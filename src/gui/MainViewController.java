@@ -1,4 +1,4 @@
-package gui;
+ package gui;
 
 import java.io.IOException;
 import java.net.URL;
@@ -15,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentService;
 
 public class MainViewController implements Initializable{
 	
@@ -34,12 +35,12 @@ public class MainViewController implements Initializable{
 	
 	@FXML
 	public void onMenuItemDepartmentAction() {
-		loadAboutView("/gui/DepartmentList.fxml");
+		loadViewDepartments("/gui/DepartmentList.fxml");
 	}
 	
 	@FXML
 	public void onMenuItemAboutAction() {
-		loadAboutView("/gui/AboutView.fxml");
+		loadView("/gui/AboutView.fxml");
 	}
 	
 	@Override
@@ -47,7 +48,7 @@ public class MainViewController implements Initializable{
 		
 	}
 	
-	public void loadAboutView(String pathView) {		
+	public void loadView(String pathView) {		
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(pathView));
 			VBox aboutVBox = loader.load();
@@ -59,6 +60,28 @@ public class MainViewController implements Initializable{
 			mainVBox.getChildren().clear();
 			mainVBox.getChildren().add(mainMenu);
 			mainVBox.getChildren().addAll(aboutVBox.getChildren());
+		} catch (IOException ioe) {
+			Alerts.showAlert("IO Exception", "Error loading view", ioe.getMessage(), AlertType.ERROR);
+		}
+	}
+	
+	public void loadViewDepartments(String pathView) {		
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(pathView));
+			VBox aboutVBox = loader.load();
+			
+			Scene mainScene = Main.getMainScene();
+			VBox mainVBox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
+					
+			Node mainMenu = mainVBox.getChildren().get(0);
+			mainVBox.getChildren().clear();
+			mainVBox.getChildren().add(mainMenu);
+			mainVBox.getChildren().addAll(aboutVBox.getChildren());
+			
+			DepartmentListController controller = loader.getController();
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
+			
 		} catch (IOException ioe) {
 			Alerts.showAlert("IO Exception", "Error loading view", ioe.getMessage(), AlertType.ERROR);
 		}
