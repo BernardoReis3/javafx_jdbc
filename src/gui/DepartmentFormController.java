@@ -1,9 +1,12 @@
 package gui;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import db.DbException;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -22,6 +25,8 @@ public class DepartmentFormController implements Initializable{
 	private Department department;
 	
 	private DepartmentService departmentService;
+	
+	private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 
 	@FXML
 	private TextField textFieldId;
@@ -48,6 +53,10 @@ public class DepartmentFormController implements Initializable{
 		this.departmentService = depService;
 	}
 	
+	public void addToDataChangeListeners(DataChangeListener dataListener) {
+		this.dataChangeListeners.add(dataListener);	
+	}
+	
 	public void updateFormData() {
 		if(department == null) {
 			throw new IllegalStateException("Department cannot be null");
@@ -67,6 +76,7 @@ public class DepartmentFormController implements Initializable{
 		try {
 			department = getFormData();
 			departmentService.saveOrUpdate(department);
+			notifyDataChangeListeners();
 			Utils.getCurretnStage(event).close();
 		}
 		catch (DbException dbe) {
@@ -74,6 +84,12 @@ public class DepartmentFormController implements Initializable{
 		}
 	}
 	
+	private void notifyDataChangeListeners() {
+		for (DataChangeListener listener : dataChangeListeners) {
+			listener.onDataChanged();
+		}
+	}
+
 	private Department getFormData() {
 		Department department = new Department();
 		department.setId(Utils.tryParseToInt(textFieldId.getText()));

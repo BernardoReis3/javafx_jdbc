@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import application.Main;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
 import javafx.collections.FXCollections;
@@ -26,7 +27,7 @@ import javafx.stage.Stage;
 import model.entities.Department;
 import model.services.DepartmentService;
 
-public class DepartmentListController implements Initializable{
+public class DepartmentListController implements Initializable, DataChangeListener{
 	
 	private DepartmentService depService;
 	
@@ -73,6 +74,7 @@ public class DepartmentListController implements Initializable{
 			DepartmentFormController departmentFormController = loader.getController();
 			departmentFormController.setDepartment(department);
 			departmentFormController.setDepartmentService(depService);
+			departmentFormController.addToDataChangeListeners(this);
 			departmentFormController.updateFormData();
 			
 			Stage dialogDepStage = new Stage();
@@ -100,6 +102,12 @@ public class DepartmentListController implements Initializable{
 		// tableView height adjustment to the window
 		Stage stage = (Stage) Main.getMainScene().getWindow();
 		tableViewDepartemnt.prefHeightProperty().bind(stage.heightProperty());
+	}
+
+
+	@Override
+	public void onDataChanged() {
+		updateTableView();
 	}
 
 }
