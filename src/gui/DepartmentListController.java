@@ -3,9 +3,11 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import application.Main;
+import db.DbIntegrityException;
 import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
@@ -19,6 +21,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -37,6 +40,9 @@ public class DepartmentListController implements Initializable, DataChangeListen
 
 	@FXML
 	private TableColumn<Department, Department> tableColumnUpdate;
+
+	@FXML
+	private TableColumn<Department, Department> tableColumnDelete;
 
 	@FXML
 	private TableView<Department> tableViewDepartemnt;
@@ -69,6 +75,7 @@ public class DepartmentListController implements Initializable, DataChangeListen
 		obsDepartmentList = FXCollections.observableArrayList(departmentList);
 		tableViewDepartemnt.setItems(obsDepartmentList);
 		initEditButtons();
+		initRemoveButtons();
 	}
 
 	private void createDialogDepartmentForm(Department department, String absoluteName, Stage parentStage) {
@@ -129,10 +136,46 @@ public class DepartmentListController implements Initializable, DataChangeListen
 				}
 
 				setGraphic(button);
-				button.setOnAction(
-						event -> createDialogDepartmentForm(obj, "/gui/DepartmentForm.fxml", Utils.getCurretnStage(event)));
+				button.setOnAction(event -> createDialogDepartmentForm(obj, "/gui/DepartmentForm.fxml",
+						Utils.getCurretnStage(event)));
 			}
 		});
+	}
+
+	private void initRemoveButtons() {
+		tableColumnDelete.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+		tableColumnDelete.setCellFactory(param -> new TableCell<Department, Department>() {
+			private final Button button = new Button("remove");
+
+			@Override
+			protected void updateItem(Department obj, boolean empty) {
+				super.updateItem(obj, empty);
+
+				if (obj == null) {
+					setGraphic(null);
+					return;
+				}
+
+				setGraphic(button);
+				button.setOnAction(event -> removeEntity(obj));
+			}
+		});
+	}
+
+	private void removeEntity(Department department) {
+		Optional<ButtonType> confirmationResult = Alerts.showConfirmation("Confirmation", "Do you want to delete this department?");
+		
+		if(confirmationResult.get() == ButtonType.OK) {
+			if(depService == null) {
+				throw new IllegalStateException("Service cannot be null");
+			}
+			try {
+				depService.deleteDepartment(department);
+				updateTableView();
+			} catch (DbIntegrityException dbie) {
+				Alerts.showAlert("Error deleting department", null, dbie.getMessage(), AlertType.ERROR);
+			}
+		}
 	}
 
 }
