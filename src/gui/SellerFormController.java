@@ -1,6 +1,8 @@
 package gui;
 
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entities.Seller;
@@ -38,7 +41,25 @@ public class SellerFormController implements Initializable{
 	private TextField textFieldName;
 	
 	@FXML
+	private TextField textFieldEmail;
+	
+	@FXML
+	private DatePicker datePickerBirthDate;
+	
+	@FXML
+	private TextField textFieldBaseSalary;
+	
+	@FXML
 	private Label labelErrorName;
+	
+	@FXML
+	private Label labelErrorEmail;
+	
+	@FXML
+	private Label labelErrorBirthDate;
+	
+	@FXML
+	private Label labelErrorBaseSalary;
 	
 	@FXML
 	private Button buttonSave;
@@ -66,6 +87,10 @@ public class SellerFormController implements Initializable{
 		}
 		textFieldId.setText(String.valueOf(seller.getId()));
 		textFieldName.setText(seller.getName());
+		textFieldEmail.setText(seller.getEmail());
+		textFieldBaseSalary.setText(String.format("%.2f", seller.getBaseSalary()));
+		if(seller.getBirthDate() != null)
+			datePickerBirthDate.setValue(LocalDate.ofInstant(seller.getBirthDate().toInstant(), ZoneId.systemDefault()));
 	}
 	
 	@FXML
@@ -126,7 +151,10 @@ public class SellerFormController implements Initializable{
 	@Override
 	public void initialize(URL uri, ResourceBundle resourceB) {
 		Constraints.setTextFieldInteger(textFieldId);
-		Constraints.setTextFieldMaxLength(textFieldName, 20);		
+		Constraints.setTextFieldMaxLength(textFieldName, 50);	
+		Constraints.setTextFieldDouble(textFieldBaseSalary);
+		Constraints.setTextFieldMaxLength(textFieldEmail, 40);
+		Utils.formatDatePicker(datePickerBirthDate, "dd/MM/yyyy");
 	}
 
 }
