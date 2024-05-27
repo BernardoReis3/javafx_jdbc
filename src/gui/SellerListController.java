@@ -31,11 +31,14 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Seller;
+import model.services.DepartmentService;
 import model.services.SellerService;
 
 public class SellerListController implements Initializable, DataChangeListener {
 
 	private SellerService sellerService;
+	
+	private DepartmentService departmentService;
 
 	private ObservableList<Seller> obsSellerList;
 
@@ -66,15 +69,18 @@ public class SellerListController implements Initializable, DataChangeListener {
 	@FXML
 	private Button buttonNewSeller;
 
+	
+
 	@FXML
 	public void onButtonNewSellerAction(ActionEvent event) {
 		Stage parentStage = Utils.getCurretnStage(event);
 		Seller seller = new Seller();
-		//createDialogSellerForm(seller, "/gui/SellerForm.fxml", parentStage);
+		createDialogSellerForm(seller, "/gui/SellerForm.fxml", parentStage);
 	}
 
-	public void setSellerService(SellerService service) {
-		this.sellerService = service;
+	public void setServices(SellerService sellerService, DepartmentService departmentService) {
+		this.sellerService = sellerService;
+		this.departmentService = departmentService;
 	}
 
 	public void updateTableView() {
@@ -96,7 +102,8 @@ public class SellerListController implements Initializable, DataChangeListener {
 
 			SellerFormController sellerFormController = loader.getController();
 			sellerFormController.setSeller(seller);
-			sellerFormController.setSellerService(sellerService);
+			sellerFormController.setServices(new SellerService(), new DepartmentService());
+			sellerFormController.loadDepartments();
 			sellerFormController.addToDataChangeListeners(this);
 			sellerFormController.updateFormData();
 
@@ -109,6 +116,7 @@ public class SellerListController implements Initializable, DataChangeListener {
 			dialogDepStage.showAndWait();
 
 		} catch (IOException ioe) {
+			ioe.printStackTrace();
 			Alerts.showAlert("Error", "Error loading view", ioe.getMessage(), AlertType.ERROR);
 		} 
 	} 
